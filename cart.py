@@ -16,8 +16,8 @@ pole_length=150
 pole_mass=0.5
 
 g=9.81
-
 time_step=0.01
+N=1000
 
 def drawcircle(canv,x,y,rad):
     canv.create_oval(x-rad,y-rad,x+rad,y+rad,width=0,fill='blue')
@@ -37,6 +37,8 @@ class cartObj(object):
 
         self.mass=cart_mass
 
+    def position(self):
+        return (self.p2_x+self.p1_x)/2
 
 
 
@@ -169,26 +171,21 @@ def simulate_timestep(canv,cart,pole,time_step,F):
 
     angle_acceleration=(g*sin(pole.angle)*(cart.mass +pole.mass ) - (F+pole.mass*pole.half_length*pole.angle*pole.angle*sin(pole.angle))*cos(pole.angle)    )/ (  (4/3)*pole.half_length*(cart.mass + pole.mass) - pole.mass*pole.half_length*cos(pole.angle)*cos(pole.angle)   )
 
-
     cart_acceleration=(F-pole.mass*pole.half_length* (angle_acceleration*cos(pole.angle) - pole.angular_speed*pole.angular_speed*sin(pole.angle) ) )/ (cart.mass + pole.mass)
 
+    #cart Stuff
     cart.acceleration=cart_acceleration
-    pole.angular_acc=angle_acceleration
-
+    cart.speed=cart.speed + cart.acceleration*time_step
     distance = (cart.speed * time_step) + (cart.acceleration * time_step * time_step) / 2
-
-    #print "distance the we need to move= " + str(distance)
-
-    #cart.move(canv,pole,distance,0)
+    cart.move(canv,pole,distance,0)
 
 
 
-
-    angle_increase = (pole.angular_speed * time_step) + (pole.angular_acc * time_step * time_step) / 2
-
-    #
+    #Pole stuff
+    pole.angular_acc=angle_acceleration
     pole.angular_speed=pole.angular_speed + pole.angular_acc*time_step
-    #
+    angle_increase = (pole.angular_speed * time_step) + (pole.angular_acc * time_step * time_step) / 2
+    pole.rotate(canv,angle_increase)
 
 
     #s = s + u * dt;
@@ -199,14 +196,28 @@ def simulate_timestep(canv,cart,pole,time_step,F):
 
 
 
-    print "angle acceleration is" + str(angle_acceleration)
+    #print "angle acceleration is" + str(angle_acceleration)
     #print "angle we need to increase= " + str(angle_increase)
     #print "pole angular speed= " + str(pole.angular_speed)
     #print "current angle" + str(pole.angle)
 
 
+def F_func(cart,pole,k1,k2,k3,k4):
 
-    pole.rotate(canv,angle_increase)
+    position=cart.position()
+    velocity=cart.speed
+    angle=pole.angle
+    angular_velocity=pole.angular_speed
+
+    inner= max(-30,k1*position + k2*velocity + k3*angle + k4*angular_velocity )
+    #print k1*position + k2*velocity + k3*angle + k4*angular_velocity
+
+    F=min (30, inner)
+
+    #print "F=" +str(F)
+
+    return F
+
 
 
 def part_6_1():
@@ -217,7 +228,7 @@ def part_6_1():
 
     #Create objects
     cart = cartObj(100, canv_height-cart_height, 100+cart_width, canv_height,0.2)
-    pole = poleObj(canv,100+cart_width/2, canv_height-cart_height, 100+cart_width/2, canv_height-cart_height-pole_length, 0.2, 0.0) #point 1 x and y, point 2 x and y , angle and angular speed
+    pole = poleObj(canv,100+cart_width/2, canv_height-cart_height, 100+cart_width/2, canv_height-cart_height-pole_length, 0.2, -0.5) #point 1 x and y, point 2 x and y , angle and angular speed
 
 
 
@@ -275,6 +286,186 @@ def part_6_1():
     root.geometry('%sx%s+%s+%s' %(canv_width, canv_height, 100, 100))
     root.resizable(0, 0)
     root.mainloop()
+
+
+
+
+
+def part_6_2():
+
+    k1=-0.3
+    k2=-1.0
+    k3=-1.0
+    k4=-1.0
+
+    step_size=0.5
+
+
+    reward_episode=run_6_2_episode(k1,k2,k3,k4)
+    print "episode had reward" + str(reward_episode)
+
+    #run episode with plus and minus step_size of k_x
+    # see which one has the bigges reward, that is the new k
+
+    while True:
+        #K1
+        k1_minus=k1-step_size
+        k1_plus=k1+step_size
+        reward_episode_minus=run_6_2_episode(k1_minus,k2,k3,k4)
+        reward_episode_plus=run_6_2_episode(k1_plus,k2,k3,k4)
+        reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
+
+        if reward_episode_minus > reward_episode_normal:
+            k1=k1_minus
+        if reward_episode_plus > reward_episode_normal:
+            k1=k1_plus
+
+        #K2
+        k2_minus=k2-step_size
+        k2_plus=k2+step_size
+        reward_episode_minus=run_6_2_episode(k1,k2_minus,k3,k4)
+        reward_episode_plus=run_6_2_episode(k1,k2_plus,k3,k4)
+        reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
+
+        if reward_episode_minus > reward_episode_normal:
+            k2=k2_minus
+        if reward_episode_plus > reward_episode_normal:
+            k2=k2_plus
+
+        #K3
+        k3_minus=k3-step_size
+        k3_plus=k3+step_size
+        reward_episode_minus=run_6_2_episode(k1,k2,k3_minus,k4)
+        reward_episode_plus=run_6_2_episode(k1,k2,k3_plus,k4)
+        reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
+
+        if reward_episode_minus > reward_episode_normal:
+            k3=k3_minus
+        if reward_episode_plus > reward_episode_normal:
+            k3=k3_plus
+
+        #K4
+        k4_minus=k4-step_size
+        k4_plus=k4+step_size
+        reward_episode_minus=run_6_2_episode(k1,k2,k3,k4_minus)
+        reward_episode_plus=run_6_2_episode(k1,k2,k3,k4_plus)
+        reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
+
+        if reward_episode_minus > reward_episode_normal:
+            k4=k4_minus
+        if reward_episode_plus > reward_episode_normal:
+            k4=k4_plus
+
+
+        reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
+        print "reward is " + str(reward_episode_normal)
+
+
+
+def run_6_2_episode(k1,k2,k3,k4):
+
+    #reward= episode (k1,k2,k3,k4)
+    #return reward
+
+    root = Tk()
+    canv = Canvas(root, width=canv_width, height=canv_height)
+    canv.pack(fill='both', expand=True)
+
+
+    #Create objects
+    cart = cartObj(100, canv_height-cart_height, 100+cart_width, canv_height,0.2)
+    pole = poleObj(canv,100+cart_width/2, canv_height-cart_height, 100+cart_width/2, canv_height-cart_height-pole_length, 0.2, -0.5) #point 1 x and y, point 2 x and y , angle and angular speed
+
+    #Draw objects
+    #middle = canv.create_line(canv_width/2, 0, canv_width/2, 640, fill='red')
+    right = canv.create_line(canv_width, 0, canv_width, canv_height, fill='blue')
+    left = canv.create_line(0, 0, 0, canv_height, fill='red')
+
+    cart.draw(canv)
+    pole.draw(canv)
+
+    iters=0
+    total_reward=0
+
+    while True:
+
+        time.sleep(time_step)
+
+        canv.delete("all")
+
+        #Move and rotate
+        #cart.move(canv,pole,3,0)
+        #pole.rotate(canv,0.1)
+        F=F_func(cart,pole,k1,k2,k3,k4)
+        simulate_timestep(canv,cart,pole,time_step,F)
+
+        #draw
+        circ1=drawcircle(canv,100+cart_width/2,canv_height-cart_height,pole_length)
+        cart.draw(canv)
+        pole.draw(canv)
+        right = canv.create_line(canv_width, 0, canv_width, canv_height, fill='blue')
+        left = canv.create_line(0, 0, 0, canv_height, fill='red')
+
+
+        #noise
+        #cart.apply_noise()
+        #pole.apply_noise()
+
+        #give rewards
+        if pole.angle > -0.1 and pole.angle < 0.1 and cart.position() > -0.1 and cart.position() < 0.1:
+            total_reward = total_reward -1
+        else:
+            total_reward = total_reward +0
+
+        #check boundaries and critical angle
+        hit=cart.check_border()
+        if hit or abs(pole.angle) >0.8:
+            total_reward=total_reward+ (-2* (N-iters) )
+            root.destroy()
+            return total_reward
+
+
+
+        canv.update()
+        iters=iters+1
+
+
+    total_reward=total_reward+ (-2* (N*iters) )
+    return total_reward
+
+
+    root.geometry('%sx%s+%s+%s' %(canv_width, canv_height, 100, 100))
+    root.resizable(0, 0)
+    root.mainloop()
+
+
+
+def episode(k1,k2,k3,k4):
+    cart = cartObj(100, canv_height-cart_height, 100+cart_width, canv_height,0.2)
+    pole = poleObj(canv,100+cart_width/2, canv_height-cart_height, 100+cart_width/2, canv_height-cart_height-pole_length, 0.2, -0.5) #point 1 x and y, point 2 x and y , angle
+
+    iters=0
+    total_reward=0
+
+    while True:
+        F=F_func(cart,pole,k1,k2,k3,k4)
+        simulate_timestep(canv,cart,pole,time_step,F)
+
+        #give rewards
+        if pole.angle > -0.1 and pole.angle < 0.1 and cart.position() > -0.1 and cart.position() < 0.1:
+            total_reward = total_reward -1
+        else:
+            total_reward = total_reward +0
+
+        #check boundaries and critical angle
+        hit=cart.check_border()
+        if hit or abs(pole.angle) >0.8:
+            total_reward=total_reward+ (-2* (N-iters) )
+            return total_reward
+
+        iters=iters+1
+    total_reward=total_reward+ (-2* (N*iters) )
+    return total_reward
 
 
 '''
@@ -341,5 +532,6 @@ def part_6_2():
 
 
 if __name__ == "__main__":
-    part_6_1()
+    #part_6_1()
+    part_6_2()
     #main()
