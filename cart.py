@@ -1,9 +1,9 @@
 from Tkinter import *
 import time
-from math import cos, sin
+from math import cos, sin, atan2, degrees, radians
 import numpy as np
 
-
+deg_90= -1.57079633
 
 canv_width=600
 canv_height=400
@@ -18,6 +18,9 @@ pole_mass=0.5
 g=9.81
 
 time_step=0.01
+
+def drawcircle(canv,x,y,rad):
+    canv.create_oval(x-rad,y-rad,x+rad,y+rad,width=0,fill='blue')
 
 
 
@@ -50,9 +53,9 @@ class cartObj(object):
         pole.p1_x=pole.p1_x+x
         pole.p1_y=pole.p1_y+y
 
-        #Move also the other point altough I do'nt know if its correct
-        #pole.p1_x=pole.p1_x+x
-        #pole.p1_y=pole.p1_y+y
+        #Move also the other point altough I don't know if its correct
+        pole.p2_x=pole.p2_x+x
+        pole.p2_y=pole.p2_y+y
 
     def apply_noise(self):
         #apply noise to position
@@ -76,13 +79,16 @@ class cartObj(object):
 
 class poleObj(object):
 
-    def __init__(self,p1_x,p1_y,p2_x,p2_y,angle,angular_velocity):
+    def __init__(self,canv,p1_x,p1_y,p2_x,p2_y,angle,angular_velocity):
         print "Creating pole"
         self.p1_x=p1_x
         self.p1_y=p1_y
         self.p2_x=p2_x
         self.p2_y=p2_y
-        self.angle=angle
+        self.angle=0.0
+        self.angle_drawing=deg_90
+        self.rotate (canv,angle)
+
         self.angular_speed=angular_velocity
         self.angular_acc=0.0
         self.length=pole_length
@@ -104,11 +110,27 @@ class poleObj(object):
 
 
     def rotate (self,canv,theta):
+        #print "pole.roate: to angle" +str(theta)
         #self.p2_x=pole_length*cos(theta)
         #self.p2_y=pole_length*sin(theta)
         #self.angle=self.angle+theta
 
+        '''
+        #better to calculate everytime the actual angle between the two points
+        x1=self.p1_x
+        x2=self.p2_x
+        y1=self.p1_y
+        y2=self.p2_y
+        angle = atan2(y1 - y2, x1 - x2)
+        angle=angle-deg_90
+        print "computed angles is " + str(angle)
+        '''
+
+        self.angle_drawing=self.angle_drawing + theta
         self.angle=self.angle+theta
+        #print "new angle of the pole is" + str(self.angle)
+        #print "new angle:drawing of the pole is" + str(self.angle_drawing)
+
 
         #original coordinates
         x_bak=self.p1_x
@@ -123,8 +145,8 @@ class poleObj(object):
         #self.p2_x=self.p2_x*cos(theta) - self.p2_y*sin(theta)
         #self.p2_y=self.p2_y*cos(theta) - self.p2_x*sin(theta)
 
-        self.p2_x=pole_length*cos(self.angle)
-        self.p2_y=pole_length*sin(self.angle)
+        self.p2_x=pole_length*cos(self.angle_drawing)
+        self.p2_y=pole_length*sin(self.angle_drawing)
 
         self.p1_x=self.p1_x+x_bak
         self.p1_y=self.p1_y+y_bak
@@ -142,6 +164,8 @@ class poleObj(object):
 
 def simulate_timestep(canv,cart,pole,time_step,F):
 
+    #angle_degrees=degrees(pole.angle)
+    #print "pole angle in degrees is" + str(angle_degrees)
 
     angle_acceleration=(g*sin(pole.angle)*(cart.mass +pole.mass ) - (F+pole.mass*pole.half_length*pole.angle*pole.angle*sin(pole.angle))*cos(pole.angle)    )/ (  (4/3)*pole.half_length*(cart.mass + pole.mass) - pole.mass*pole.half_length*cos(pole.angle)*cos(pole.angle)   )
 
@@ -153,15 +177,36 @@ def simulate_timestep(canv,cart,pole,time_step,F):
 
     distance = (cart.speed * time_step) + (cart.acceleration * time_step * time_step) / 2
 
-    print "distance the we need to move= " + str(distance)
+    #print "distance the we need to move= " + str(distance)
 
-    cart.move(canv,pole,distance,0)
+    #cart.move(canv,pole,distance,0)
+
+
+
 
     angle_increase = (pole.angular_speed * time_step) + (pole.angular_acc * time_step * time_step) / 2
 
-    print "angle we need to increase= " + str(angle_increase)
+    #
+    pole.angular_speed=pole.angular_speed + pole.angular_acc*time_step
+    #
 
-    #pole.rotate(canv,angle_increase)
+
+    #s = s + u * dt;
+    #u = u + a * dt;
+
+    #angle_increase= pole.angular_speed * time_step;
+    #pole.angular_speed=pole.angular_speed + pole.angular_acc*time_step
+
+
+
+    print "angle acceleration is" + str(angle_acceleration)
+    #print "angle we need to increase= " + str(angle_increase)
+    #print "pole angular speed= " + str(pole.angular_speed)
+    #print "current angle" + str(pole.angle)
+
+
+
+    pole.rotate(canv,angle_increase)
 
 
 def part_6_1():
@@ -169,10 +214,12 @@ def part_6_1():
     canv = Canvas(root, width=canv_width, height=canv_height)
     canv.pack(fill='both', expand=True)
 
-    #Create objects
 
+    #Create objects
     cart = cartObj(100, canv_height-cart_height, 100+cart_width, canv_height,0.2)
-    pole = poleObj(100+cart_width/2, canv_height-cart_height, 100+cart_width/2, canv_height-cart_height-pole_length, 1.3708, -0.5) #point 1 x and y, point 2 x and y
+    pole = poleObj(canv,100+cart_width/2, canv_height-cart_height, 100+cart_width/2, canv_height-cart_height-pole_length, 0.2, 0.0) #point 1 x and y, point 2 x and y , angle and angular speed
+
+
 
 
     #Draw objects
@@ -202,9 +249,10 @@ def part_6_1():
         #Move and rotate
         #cart.move(canv,pole,3,0)
         #pole.rotate(canv,0.1)
-        simulate_timestep(canv,cart,pole,time_step,0)
+        simulate_timestep(canv,cart,pole,time_step,0.0)
 
         #draw
+        circ1=drawcircle(canv,100+cart_width/2,canv_height-cart_height,pole_length)
         cart.draw(canv)
         pole.draw(canv)
         right = canv.create_line(canv_width, 0, canv_width, canv_height, fill='blue')
