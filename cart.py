@@ -45,13 +45,13 @@ def main():
     #pole = poleObj(canv_width/2, 0, canv_width/2, 640)
 
     #Draw objects
-    middle = canv.create_line(canv_width/2, 0, canv_width/2, 640, fill='red')
+    #middle = canv.create_line(canv_width/2, 0, canv_width/2, 640, fill='red')
     right = canv.create_line(canv_width, 0, canv_width, canv_height, fill='blue')
     left = canv.create_line(0, 0, 0, canv_height, fill='red')
 
-    #cart = canv.create_rectangle(cart.p1_x, cart.p1_y , cart.p2_x, cart.p2_y, outline='black', fill='gray40', tags=('rect'))
-    pole = canv.create_line(pole.p1_x, pole.p1_y, pole.p2_x, pole.p1_y, fill='red')
-    #pole = canv.create_line(canv_width/2, 0, canv_width/2, 640, fill='red')
+    cart_draw = canv.create_rectangle(cart.p1_x, cart.p1_y , cart.p2_x, cart.p2_y, outline='black', fill='gray40', tags=('rect'))
+    pole_draw = canv.create_line(pole.p1_x, pole.p1_y, pole.p2_x, pole.p2_y, fill='red')
+    
 
 
     #cart.apple()
