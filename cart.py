@@ -27,7 +27,7 @@ def drawcircle(canv,x,y,rad):
 class cartObj(object):
 
     def __init__(self,p1_x,p1_y,p2_x,p2_y,speed):
-        print "Creating cart"
+        #print "Creating cart"
         self.p1_x=p1_x
         self.p1_y=p1_y
         self.p2_x=p2_x
@@ -38,7 +38,10 @@ class cartObj(object):
         self.mass=cart_mass
 
     def position(self):
-        return (self.p2_x+self.p1_x)/2
+        pos = (self.p2_x+self.p1_x)/2 -canv_width/2
+        pos=pos/100
+
+        return pos
 
 
 
@@ -82,7 +85,7 @@ class cartObj(object):
 class poleObj(object):
 
     def __init__(self,canv,p1_x,p1_y,p2_x,p2_y,angle,angular_velocity):
-        print "Creating pole"
+        #print "Creating pole"
         self.p1_x=p1_x
         self.p1_y=p1_y
         self.p2_x=p2_x
@@ -210,7 +213,7 @@ def F_func(cart,pole,k1,k2,k3,k4):
     angular_velocity=pole.angular_speed
 
     inner= max(-30,k1*position + k2*velocity + k3*angle + k4*angular_velocity )
-    #print k1*position + k2*velocity + k3*angle + k4*angular_velocity
+    #print "inner is "  + str (k1*position + k2*velocity + k3*angle + k4*angular_velocity)
 
     F=min (30, inner)
 
@@ -289,25 +292,160 @@ def part_6_1():
 
 
 
+def brute_force():
+    #k1=1
+    #k2=-1.0
+    #k3=5.0
+    #k4=4.0
+    #step_size=0.75
 
+    k1_best=0.0
+    k2_best=0.0
+    k3_best=0.0
+    k4_best=0.0
+    step_size=1
+
+    highest_reward=-999999
+
+    for k1 in range(-50, 50, step_size):
+        for k2 in range(-50, 50, step_size):
+            for k3 in range(-50, 50, step_size):
+                for k4 in range(-50, 50, step_size):
+                    reward_episode=run_6_2_episode(k1,k2,k3,k4)
+                    print "reward is " + str(reward_episode) + " " + str(k1) + " " + str(k2) + " " + str(k3) + " " + str(k4)
+
+                    if reward_episode > highest_reward:
+                        print "updating the best"
+                        highest_reward=reward_episode
+                        k1_best=k1
+                        k2_best=k2
+                        k3_best=k3
+                        k4_best=k4
+
+
+    print "finished"
+    reward_episode=run_6_2_episode(k1_best,k2_best,k3_best,k4_best)
+    print "reward is " + str(reward_episode) + " " + str(k1_best) + " " + str(k2_best) + " " + str(k3_best) + " " + str(k4_best)
 
 def part_6_2():
 
-    k1=-0.3
+    #-718 doing normal on each step
+    #k1=-0.3
+    #k2=-1.0
+    #k3=-1.0
+    #k4=-1.0
+    #step_size=0.5
+
+    #-716 doing normal on each step
+    #k1=0.3
+    #k2=-1.0
+    #k3=-1.0
+    #k4=-1.0
+    #step_size=0.75
+
+    #-716 doing normal only once
+    #k1=0.3
+    #k2=-1.0
+    #k3=-1.0
+    #k4=-1.0
+    #step_size=0.75
+
+    #-718 doing normal only once
+    #k1=0.3
+    #k2=0.5
+    #k3=4.0
+    #k4=1.0
+    #step_size=0.25
+
+
+
+    #All of these are with the bug of the position being in pixels and not in meters
+
+    #converges prtty ok, probably the one that I will submit
+    #k1=0.3
+    #k2=-1.0
+    #k3=5.0
+    #k4=-2.0
+    #step_size=0.75
+
+    #1108
+    #k1=-1.3
+    #k2=4.0
+    #k3=7.0
+    #k4=5.0
+    #step_size=0.75
+
+    #1104
+    #k1=-1.3
+    #k2=4.0
+    #k3=-1.0
+    #k4=5.0
+    #step_size=0.75
+
+    #1100
+    #k1=-1.3
+    #k2=4.0
+    #k3=-7.0
+    #k4=5.0
+    #step_size=0.75
+
+    #1098
+    #k1=-1.3
+    #k2=4.0
+    #k3=-15.0
+    #k4=5.0
+    #step_size=0.75
+
+    k1=-1.3
+    k2=4.0
+    k3=-16.0
+    k4=5.0
+    step_size=0.75
+
+    #Here I stop the ones that have the position bug
+
+    #One given to me
+    k1=-10
     k2=-1.0
-    k3=-1.0
-    k4=-1.0
+    k3=+300.0
+    k4=10.0
+    step_size=0.75
 
-    step_size=0.5
+    #use now with the correct positon
+
+    k1=1
+    k2=-1.0
+    k3=5.0
+    k4=4.0
+    step_size=0.75
 
 
-    reward_episode=run_6_2_episode(k1,k2,k3,k4)
-    print "episode had reward" + str(reward_episode)
+
+    reward_episode_initial=run_6_2_episode(k1,k2,k3,k4)
+    print "episode had reward" + str(reward_episode_initial)
 
     #run episode with plus and minus step_size of k_x
     # see which one has the bigges reward, that is the new k
 
-    while True:
+    iter =0
+
+    while iter < 100:
+        k1_new=k1
+        k2_new=k2
+        k3_new=k3
+        k4_new=k4
+
+        slope_k1_plus=0.0
+        slope_k1_minus=0.0
+        slope_k2_plus=0.0
+        slope_k2_minus=0.0
+        slope_k3_plus=0.0
+        slope_k3_minus=0.0
+        slope_k4_plus=0.0
+        slope_k4_minus=0.0
+
+
+        reward_episode_initial=run_6_2_episode(k1,k2,k3,k4)
         #K1
         k1_minus=k1-step_size
         k1_plus=k1+step_size
@@ -315,50 +453,140 @@ def part_6_2():
         reward_episode_plus=run_6_2_episode(k1_plus,k2,k3,k4)
         reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
 
+
+        slope_k1_plus=(reward_episode_plus- reward_episode_initial)/step_size
+        slope_k1_minus=(reward_episode_minus- reward_episode_initial)/step_size
+
+        #print "rewardplus is ",reward_episode_plus, "reward episode minus is ", reward_episode_minus, "normal is " ,reward_episode_initial, "slope plus is ",slope_k1_plus, "slope minus is ", slope_k1_minus
+
+        '''
+        if (reward_episode_plus- reward_episode_initial)/step_size > 0:
+            k1_new=k1_plus
+        if (reward_episode_minus- reward_episode_initial)/step_size > 0:
+            k1_new=k1_minus
+        '''
+
+        '''
         if reward_episode_minus > reward_episode_normal:
             k1=k1_minus
         if reward_episode_plus > reward_episode_normal:
             k1=k1_plus
+        '''
 
         #K2
         k2_minus=k2-step_size
         k2_plus=k2+step_size
         reward_episode_minus=run_6_2_episode(k1,k2_minus,k3,k4)
         reward_episode_plus=run_6_2_episode(k1,k2_plus,k3,k4)
-        reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
+        #reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
 
+        slope_k2_plus=(reward_episode_plus- reward_episode_initial)/step_size
+        slope_k2_minus=(reward_episode_minus- reward_episode_initial)/step_size
+
+        '''
+        if (reward_episode_plus- reward_episode_initial)/step_size > 0:
+            k2_new=k2_plus
+        if (reward_episode_minus- reward_episode_initial)/step_size > 0:
+            k2_new=k2_minus
+        '''
+
+        '''
         if reward_episode_minus > reward_episode_normal:
             k2=k2_minus
         if reward_episode_plus > reward_episode_normal:
             k2=k2_plus
+        '''
 
         #K3
         k3_minus=k3-step_size
         k3_plus=k3+step_size
         reward_episode_minus=run_6_2_episode(k1,k2,k3_minus,k4)
         reward_episode_plus=run_6_2_episode(k1,k2,k3_plus,k4)
-        reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
+        #reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
 
+        slope_k3_plus=(reward_episode_plus- reward_episode_initial)/step_size
+        slope_k3_minus=(reward_episode_minus- reward_episode_initial)/step_size
+
+        '''
+        if (reward_episode_plus- reward_episode_initial)/step_size > 0:
+            k3_new=k3_plus
+        if (reward_episode_minus- reward_episode_initial)/step_size > 0:
+            k3_new=k3_minus
+        '''
+
+        '''
         if reward_episode_minus > reward_episode_normal:
             k3=k3_minus
         if reward_episode_plus > reward_episode_normal:
             k3=k3_plus
+        '''
 
         #K4
         k4_minus=k4-step_size
         k4_plus=k4+step_size
         reward_episode_minus=run_6_2_episode(k1,k2,k3,k4_minus)
         reward_episode_plus=run_6_2_episode(k1,k2,k3,k4_plus)
-        reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
+        #reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
 
+        slope_k4_plus=(reward_episode_plus- reward_episode_initial)/step_size
+        slope_k4_minus=(reward_episode_minus- reward_episode_initial)/step_size
+
+        '''
+        if (reward_episode_plus- reward_episode_initial)/step_size > 0:
+            k4_new=k4_plus
+        if (reward_episode_minus- reward_episode_initial)/step_size > 0:
+            k4_new=k4_minus
+        '''
+
+        '''
         if reward_episode_minus > reward_episode_normal:
             k4=k4_minus
         if reward_episode_plus > reward_episode_normal:
             k4=k4_plus
+        '''
 
 
+        '''
+        k1=k1_new
+        k2=k2_new
+        k3=k3_new
+        k4=k4_new
+        '''
+
+
+        ##new way of doing it by only choosing the highes slope and updating that one
+        x = np.array([slope_k1_plus,slope_k1_minus,slope_k2_plus,slope_k2_minus,slope_k3_plus,slope_k3_minus,slope_k4_plus,slope_k4_minus])
+        if np.all(x==0):
+            #no more slope, we Converged
+            print "CONVERGENCE: reward is " + str(reward_episode_normal) + " " + str(k1) + " " + str(k2) + " " + str(k3) + " " + str(k4)
+            break;
+
+        maximum= x.tolist().index(max(x))
+        #print maximum
+
+
+        if maximum==0:
+            k1=k1+step_size
+        if maximum==1:
+            k1=k1-step_size
+        if maximum==2:
+            k2=k2+step_size
+        if maximum==3:
+            k2=k2-step_size
+        if maximum==4:
+            k3=k3+step_size
+        if maximum==5:
+            k3=k3-step_size
+        if maximum==6:
+            k4=k4+step_size
+        if maximum==7:
+            k4=k4-step_size
+
+
+
+        iter = iter+1
         reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
-        print "reward is " + str(reward_episode_normal)
+        print "reward is " + str(reward_episode_normal) + " " + str(k1) + " " + str(k2) + " " + str(k3) + " " + str(k4)
 
 
 
@@ -373,8 +601,8 @@ def run_6_2_episode(k1,k2,k3,k4):
 
 
     #Create objects
-    cart = cartObj(100, canv_height-cart_height, 100+cart_width, canv_height,0.2)
-    pole = poleObj(canv,100+cart_width/2, canv_height-cart_height, 100+cart_width/2, canv_height-cart_height-pole_length, 0.2, -0.5) #point 1 x and y, point 2 x and y , angle and angular speed
+    cart = cartObj(250, canv_height-cart_height, 250+cart_width, canv_height,0.2)
+    pole = poleObj(canv,250+cart_width/2, canv_height-cart_height, 250+cart_width/2, canv_height-cart_height-pole_length, 0.2, -0.4) #point 1 x and y, point 2 x and y , angle and angular speed
 
     #Draw objects
     #middle = canv.create_line(canv_width/2, 0, canv_width/2, 640, fill='red')
@@ -387,9 +615,9 @@ def run_6_2_episode(k1,k2,k3,k4):
     iters=0
     total_reward=0
 
-    while True:
+    while iters < 1000:
 
-        time.sleep(time_step)
+        #time.sleep(time_step)
 
         canv.delete("all")
 
@@ -400,7 +628,7 @@ def run_6_2_episode(k1,k2,k3,k4):
         simulate_timestep(canv,cart,pole,time_step,F)
 
         #draw
-        circ1=drawcircle(canv,100+cart_width/2,canv_height-cart_height,pole_length)
+        #circ1=drawcircle(canv,100+cart_width/2,canv_height-cart_height,pole_length)
         cart.draw(canv)
         pole.draw(canv)
         right = canv.create_line(canv_width, 0, canv_width, canv_height, fill='blue')
@@ -411,11 +639,12 @@ def run_6_2_episode(k1,k2,k3,k4):
         #cart.apply_noise()
         #pole.apply_noise()
 
+
         #give rewards
         if pole.angle > -0.1 and pole.angle < 0.1 and cart.position() > -0.1 and cart.position() < 0.1:
-            total_reward = total_reward -1
-        else:
             total_reward = total_reward +0
+        else:
+            total_reward = total_reward -1
 
         #check boundaries and critical angle
         hit=cart.check_border()
@@ -430,19 +659,21 @@ def run_6_2_episode(k1,k2,k3,k4):
         iters=iters+1
 
 
-    total_reward=total_reward+ (-2* (N*iters) )
+
+    total_reward=total_reward+ (-2* (N-iters) )
+    root.destroy()
     return total_reward
 
 
-    root.geometry('%sx%s+%s+%s' %(canv_width, canv_height, 100, 100))
-    root.resizable(0, 0)
-    root.mainloop()
+    #root.geometry('%sx%s+%s+%s' %(canv_width, canv_height, 100, 100))
+    #root.resizable(0, 0)
+    #root.mainloop()
 
 
 
 def episode(k1,k2,k3,k4):
     cart = cartObj(100, canv_height-cart_height, 100+cart_width, canv_height,0.2)
-    pole = poleObj(canv,100+cart_width/2, canv_height-cart_height, 100+cart_width/2, canv_height-cart_height-pole_length, 0.2, -0.5) #point 1 x and y, point 2 x and y , angle
+    pole = poleObj(canv,100+cart_width/2, canv_height-cart_height, 100+cart_width/2, canv_height-cart_height-pole_length, 0.2, -0.2) #point 1 x and y, point 2 x and y , angle
 
     iters=0
     total_reward=0
@@ -533,5 +764,6 @@ def part_6_2():
 
 if __name__ == "__main__":
     #part_6_1()
-    part_6_2()
+    #part_6_2()
+    brute_force()
     #main()
