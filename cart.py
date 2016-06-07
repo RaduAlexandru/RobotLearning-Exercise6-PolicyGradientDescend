@@ -39,7 +39,7 @@ class cartObj(object):
 
     def position(self):
         pos = (self.p2_x+self.p1_x)/2 -canv_width/2
-        pos=pos/100
+        #pos=pos/100
 
         return pos
 
@@ -48,7 +48,7 @@ class cartObj(object):
     def draw(self,canv):
         self.cart_draw = canv.create_rectangle(self.p1_x, self.p1_y , self.p2_x, self.p2_y, outline='black', fill='gray40', tags=('rect'))
 
-    def move (self,canv,pole,x,y):
+    def move (self,pole,x,y):
         self.p1_x=self.p1_x+x
         self.p1_y=self.p1_y+y
         self.p2_x=self.p2_x+x
@@ -84,7 +84,7 @@ class cartObj(object):
 
 class poleObj(object):
 
-    def __init__(self,canv,p1_x,p1_y,p2_x,p2_y,angle,angular_velocity):
+    def __init__(self,p1_x,p1_y,p2_x,p2_y,angle,angular_velocity):
         #print "Creating pole"
         self.p1_x=p1_x
         self.p1_y=p1_y
@@ -92,7 +92,7 @@ class poleObj(object):
         self.p2_y=p2_y
         self.angle=0.0
         self.angle_drawing=deg_90
-        self.rotate (canv,angle)
+        self.rotate (angle)
 
         self.angular_speed=angular_velocity
         self.angular_acc=0.0
@@ -114,7 +114,7 @@ class poleObj(object):
 
 
 
-    def rotate (self,canv,theta):
+    def rotate (self,theta):
         #print "pole.roate: to angle" +str(theta)
         #self.p2_x=pole_length*cos(theta)
         #self.p2_y=pole_length*sin(theta)
@@ -167,7 +167,7 @@ class poleObj(object):
 
 
 
-def simulate_timestep(canv,cart,pole,time_step,F):
+def simulate_timestep(cart,pole,time_step,F):
 
     #angle_degrees=degrees(pole.angle)
     #print "pole angle in degrees is" + str(angle_degrees)
@@ -179,16 +179,16 @@ def simulate_timestep(canv,cart,pole,time_step,F):
     #cart Stuff
     cart.acceleration=cart_acceleration
     cart.speed=cart.speed + cart.acceleration*time_step
-    distance = (cart.speed * time_step) + (cart.acceleration * time_step * time_step) / 2
-    cart.move(canv,pole,distance,0)
+    distance = (cart.speed * time_step) #+ (cart.acceleration * time_step * time_step) / 2
+    cart.move(pole,distance,0)
 
 
 
     #Pole stuff
     pole.angular_acc=angle_acceleration
     pole.angular_speed=pole.angular_speed + pole.angular_acc*time_step
-    angle_increase = (pole.angular_speed * time_step) + (pole.angular_acc * time_step * time_step) / 2
-    pole.rotate(canv,angle_increase)
+    angle_increase = (pole.angular_speed * time_step) #+ (pole.angular_acc * time_step * time_step) / 2
+    pole.rotate(angle_increase)
 
 
     #s = s + u * dt;
@@ -231,7 +231,7 @@ def part_6_1():
 
     #Create objects
     cart = cartObj(100, canv_height-cart_height, 100+cart_width, canv_height,0.2)
-    pole = poleObj(canv,100+cart_width/2, canv_height-cart_height, 100+cart_width/2, canv_height-cart_height-pole_length, 0.2, -0.5) #point 1 x and y, point 2 x and y , angle and angular speed
+    pole = poleObj(100+cart_width/2, canv_height-cart_height, 100+cart_width/2, canv_height-cart_height-pole_length, 0.2, -0.5) #point 1 x and y, point 2 x and y , angle and angular speed
 
 
 
@@ -261,9 +261,9 @@ def part_6_1():
         canv.delete("all")
 
         #Move and rotate
-        #cart.move(canv,pole,3,0)
-        #pole.rotate(canv,0.1)
-        simulate_timestep(canv,cart,pole,time_step,0.0)
+        #cart.move(pole,3,0)
+        #pole.rotate(0.1)
+        simulate_timestep(cart,pole,time_step,0.0)
 
         #draw
         circ1=drawcircle(canv,100+cart_width/2,canv_height-cart_height,pole_length)
@@ -307,11 +307,23 @@ def brute_force():
 
     highest_reward=-999999
 
-    for k1 in range(-50, 50, step_size):
-        for k2 in range(-50, 50, step_size):
-            for k3 in range(-50, 50, step_size):
-                for k4 in range(-50, 50, step_size):
-                    reward_episode=run_6_2_episode(k1,k2,k3,k4)
+    #-1276 -7 2 -10 7
+
+    #-1273 -8.0 1.9 -11.0 7.8
+
+    #-1265 6.0 1.0 -1.0 14.0
+
+
+    for i in [float(j)/10 for j in range(-10, 10, 1)]:
+        print i
+
+    #return
+
+    for k1 in [float(u)/1 for u in range(-15, 15, 1)]:
+        for k2 in [float(p)/1 for p in range(-15, 15, 1)]:
+            for k3 in [float(j)/1 for j in range(-15, 15, 1)]:
+                for k4 in [float(k)/1 for k in range(-15, 15, 1)]:
+                    reward_episode=episode(k1,k2,k3,k4)
                     print "reward is " + str(reward_episode) + " " + str(k1) + " " + str(k2) + " " + str(k3) + " " + str(k4)
 
                     if reward_episode > highest_reward:
@@ -404,21 +416,29 @@ def part_6_2():
 
     #Here I stop the ones that have the position bug
 
+
     #One given to me
-    k1=-10
-    k2=-1.0
+    k1=30
+    k2=19
     k3=+300.0
-    k4=10.0
+    k4=30.0
     step_size=0.75
 
     #use now with the correct positon
-
+    '''
     k1=1
     k2=-1.0
     k3=5.0
     k4=4.0
     step_size=0.75
 
+
+    k1=13
+    k2=19.0
+    k3=300.0
+    k4=30.0
+    step_size=0.7
+    '''
 
 
     reward_episode_initial=run_6_2_episode(k1,k2,k3,k4)
@@ -602,7 +622,7 @@ def run_6_2_episode(k1,k2,k3,k4):
 
     #Create objects
     cart = cartObj(250, canv_height-cart_height, 250+cart_width, canv_height,0.2)
-    pole = poleObj(canv,250+cart_width/2, canv_height-cart_height, 250+cart_width/2, canv_height-cart_height-pole_length, 0.2, -0.4) #point 1 x and y, point 2 x and y , angle and angular speed
+    pole = poleObj(250+cart_width/2, canv_height-cart_height, 250+cart_width/2, canv_height-cart_height-pole_length, 0.2, -0.5) #point 1 x and y, point 2 x and y , angle and angular speed
 
     #Draw objects
     #middle = canv.create_line(canv_width/2, 0, canv_width/2, 640, fill='red')
@@ -622,10 +642,10 @@ def run_6_2_episode(k1,k2,k3,k4):
         canv.delete("all")
 
         #Move and rotate
-        #cart.move(canv,pole,3,0)
-        #pole.rotate(canv,0.1)
+        #cart.move(pole,3,0)
+        #pole.rotate(0.1)
         F=F_func(cart,pole,k1,k2,k3,k4)
-        simulate_timestep(canv,cart,pole,time_step,F)
+        simulate_timestep(cart,pole,time_step,F)
 
         #draw
         #circ1=drawcircle(canv,100+cart_width/2,canv_height-cart_height,pole_length)
@@ -672,21 +692,22 @@ def run_6_2_episode(k1,k2,k3,k4):
 
 
 def episode(k1,k2,k3,k4):
-    cart = cartObj(100, canv_height-cart_height, 100+cart_width, canv_height,0.2)
-    pole = poleObj(canv,100+cart_width/2, canv_height-cart_height, 100+cart_width/2, canv_height-cart_height-pole_length, 0.2, -0.2) #point 1 x and y, point 2 x and y , angle
+    cart = cartObj(250, canv_height-cart_height, 250+cart_width, canv_height,0.2)
+    pole = poleObj(250+cart_width/2, canv_height-cart_height, 250+cart_width/2, canv_height-cart_height-pole_length, 0.2, -0.4) #point 1 x and y, point 2 x and y , angle and
 
     iters=0
     total_reward=0
 
-    while True:
+    while iters < 1000:
         F=F_func(cart,pole,k1,k2,k3,k4)
-        simulate_timestep(canv,cart,pole,time_step,F)
+        simulate_timestep(cart,pole,time_step,F)
 
         #give rewards
         if pole.angle > -0.1 and pole.angle < 0.1 and cart.position() > -0.1 and cart.position() < 0.1:
-            total_reward = total_reward -1
-        else:
             total_reward = total_reward +0
+        else:
+            total_reward = total_reward -1
+
 
         #check boundaries and critical angle
         hit=cart.check_border()
@@ -695,7 +716,8 @@ def episode(k1,k2,k3,k4):
             return total_reward
 
         iters=iters+1
-    total_reward=total_reward+ (-2* (N*iters) )
+
+    total_reward=total_reward+ (-2* (N-iters) )
     return total_reward
 
 
@@ -733,8 +755,8 @@ def part_6_2():
         canv.delete("all")
 
         #Move and rotate
-        cart.move(canv,pole,3,0)
-        pole.rotate(canv,0.1)
+        cart.move(pole,3,0)
+        pole.rotate(0.1)
 
         #draw
         cart.draw(canv)
@@ -764,6 +786,6 @@ def part_6_2():
 
 if __name__ == "__main__":
     #part_6_1()
-    #part_6_2()
-    brute_force()
+    part_6_2()
+    #brute_force()
     #main()
