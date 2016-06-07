@@ -464,13 +464,13 @@ def part_6_2():
         slope_k4_minus=0.0
 
 
-        reward_episode_initial=run_6_2_episode(k1,k2,k3,k4)
+        reward_episode_initial=episode(k1,k2,k3,k4)
         #K1
         k1_minus=k1-step_size
         k1_plus=k1+step_size
-        reward_episode_minus=run_6_2_episode(k1_minus,k2,k3,k4)
-        reward_episode_plus=run_6_2_episode(k1_plus,k2,k3,k4)
-        reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
+        reward_episode_minus=episode(k1_minus,k2,k3,k4)
+        reward_episode_plus=episode(k1_plus,k2,k3,k4)
+        reward_episode_normal=episode(k1,k2,k3,k4)
 
 
         slope_k1_plus=(reward_episode_plus- reward_episode_initial)/step_size
@@ -495,8 +495,8 @@ def part_6_2():
         #K2
         k2_minus=k2-step_size
         k2_plus=k2+step_size
-        reward_episode_minus=run_6_2_episode(k1,k2_minus,k3,k4)
-        reward_episode_plus=run_6_2_episode(k1,k2_plus,k3,k4)
+        reward_episode_minus=episode(k1,k2_minus,k3,k4)
+        reward_episode_plus=episode(k1,k2_plus,k3,k4)
         #reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
 
         slope_k2_plus=(reward_episode_plus- reward_episode_initial)/step_size
@@ -519,8 +519,8 @@ def part_6_2():
         #K3
         k3_minus=k3-step_size
         k3_plus=k3+step_size
-        reward_episode_minus=run_6_2_episode(k1,k2,k3_minus,k4)
-        reward_episode_plus=run_6_2_episode(k1,k2,k3_plus,k4)
+        reward_episode_minus=episode(k1,k2,k3_minus,k4)
+        reward_episode_plus=episode(k1,k2,k3_plus,k4)
         #reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
 
         slope_k3_plus=(reward_episode_plus- reward_episode_initial)/step_size
@@ -543,8 +543,8 @@ def part_6_2():
         #K4
         k4_minus=k4-step_size
         k4_plus=k4+step_size
-        reward_episode_minus=run_6_2_episode(k1,k2,k3,k4_minus)
-        reward_episode_plus=run_6_2_episode(k1,k2,k3,k4_plus)
+        reward_episode_minus=episode(k1,k2,k3,k4_minus)
+        reward_episode_plus=episode(k1,k2,k3,k4_plus)
         #reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
 
         slope_k4_plus=(reward_episode_plus- reward_episode_initial)/step_size
@@ -604,9 +604,12 @@ def part_6_2():
 
 
         iter = iter+1
+        reward_episode_normal=episode(k1,k2,k3,k4)
+        print "reward is " + str(reward_episode_normal) + " " + str(k1) + " " + str(k2) + " " + str(k3) + " " + str(k4)
+    while True:
+        print "final one is"
         reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
         print "reward is " + str(reward_episode_normal) + " " + str(k1) + " " + str(k2) + " " + str(k3) + " " + str(k4)
-
 
 
 def run_6_2_episode(k1,k2,k3,k4):
@@ -636,7 +639,7 @@ def run_6_2_episode(k1,k2,k3,k4):
 
     while iters < 1000:
 
-        #time.sleep(time_step)
+        time.sleep(time_step)
 
         canv.delete("all")
 
@@ -692,7 +695,7 @@ def run_6_2_episode(k1,k2,k3,k4):
 
 def episode(k1,k2,k3,k4):
     cart = cartObj(250, canv_height-cart_height, 250+cart_width, canv_height,0.2)
-    pole = poleObj(250+cart_width/2, canv_height-cart_height, 250+cart_width/2, canv_height-cart_height-pole_length, 0.2, -0.4) #point 1 x and y, point 2 x and y , angle and
+    pole = poleObj(250+cart_width/2, canv_height-cart_height, 250+cart_width/2, canv_height-cart_height-pole_length, 0.2, -0.2) #point 1 x and y, point 2 x and y , angle and
 
     iters=0
     total_reward=0
