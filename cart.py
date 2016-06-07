@@ -416,7 +416,7 @@ def part_6_2():
 
     #Here I stop the ones that have the position bug
 
-
+    '''
     #One given to me
     k1=30
     k2=19
@@ -425,7 +425,7 @@ def part_6_2():
     step_size=0.75
 
     #use now with the correct positon
-    '''
+
     k1=1
     k2=-1.0
     k3=5.0
@@ -469,9 +469,9 @@ def part_6_2():
         #K1
         k1_minus=k1-step_size
         k1_plus=k1+step_size
-        reward_episode_minus=run_6_2_episode(k1_minus,k2,k3,k4)
-        reward_episode_plus=run_6_2_episode(k1_plus,k2,k3,k4)
-        reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
+        reward_episode_minus=episode(k1_minus,k2,k3,k4)
+        reward_episode_plus=episode(k1_plus,k2,k3,k4)
+        reward_episode_normal=episode(k1,k2,k3,k4)
 
 
         slope_k1_plus=(reward_episode_plus- reward_episode_initial)/step_size
@@ -496,8 +496,8 @@ def part_6_2():
         #K2
         k2_minus=k2-step_size
         k2_plus=k2+step_size
-        reward_episode_minus=run_6_2_episode(k1,k2_minus,k3,k4)
-        reward_episode_plus=run_6_2_episode(k1,k2_plus,k3,k4)
+        reward_episode_minus=episode(k1,k2_minus,k3,k4)
+        reward_episode_plus=episode(k1,k2_plus,k3,k4)
         #reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
 
         slope_k2_plus=(reward_episode_plus- reward_episode_initial)/step_size
@@ -520,8 +520,8 @@ def part_6_2():
         #K3
         k3_minus=k3-step_size
         k3_plus=k3+step_size
-        reward_episode_minus=run_6_2_episode(k1,k2,k3_minus,k4)
-        reward_episode_plus=run_6_2_episode(k1,k2,k3_plus,k4)
+        reward_episode_minus=episode(k1,k2,k3_minus,k4)
+        reward_episode_plus=episode(k1,k2,k3_plus,k4)
         #reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
 
         slope_k3_plus=(reward_episode_plus- reward_episode_initial)/step_size
@@ -544,8 +544,8 @@ def part_6_2():
         #K4
         k4_minus=k4-step_size
         k4_plus=k4+step_size
-        reward_episode_minus=run_6_2_episode(k1,k2,k3,k4_minus)
-        reward_episode_plus=run_6_2_episode(k1,k2,k3,k4_plus)
+        reward_episode_minus=episode(k1,k2,k3,k4_minus)
+        reward_episode_plus=episode(k1,k2,k3,k4_plus)
         #reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
 
         slope_k4_plus=(reward_episode_plus- reward_episode_initial)/step_size
@@ -605,8 +605,9 @@ def part_6_2():
 
 
         iter = iter+1
-        reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
+        reward_episode_normal=episode(k1,k2,k3,k4)
         print "reward is " + str(reward_episode_normal) + " " + str(k1) + " " + str(k2) + " " + str(k3) + " " + str(k4)
+    reward_episode_normal=run_6_2_episode(k1,k2,k3,k4)
 
 
 
